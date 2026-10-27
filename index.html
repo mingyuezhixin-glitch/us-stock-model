@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金渐成 · 美股投资决策模型</title>
+<style>
+  :root{
+    --bg:#0b0f14; --bg2:#11161d; --card:#161d26; --card2:#1c2531;
+    --line:#263140; --line2:#334355;
+    --txt:#e6edf3; --txt2:#9aa7b4; --txt3:#6b7a88;
+    --gold:#e8b23a; --gold2:#f4c95d;
+    --blue:#4d8df0; --green:#3fb950; --red:#f85149; --orange:#f0883e;
+    --purple:#a371f7;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; font-size:15px; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--blue); text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px 80px;}
+
+  /* header */
+  header{
+    padding:44px 0 10px;
+  }
+  .brand{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;}
+  .brand h1{
+    font-size:30px; letter-spacing:.5px; font-weight:800;
+    background:linear-gradient(90deg,var(--gold2),var(--gold) 40%,var(--blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand .tag{color:var(--txt3); font-size:13px; letter-spacing:2px;}
+  .sub{margin-top:8px; color:var(--txt2); max-width:860px; font-size:14px;}
+
+  .banner{
+    margin-top:22px; border:1px solid #3a2f1a; background:linear-gradient(90deg,#241c0c,#161d26);
+    border-radius:12px; padding:14px 16px; color:#d9c08a; font-size:13px;
+  }
+  .banner b{color:var(--gold2);}
+
+  /* section */
+  section{margin-top:40px;}
+  h2{
+    font-size:20px; font-weight:700; display:flex; align-items:center; gap:10px; margin-bottom:6px;
+  }
+  h2 .bar{width:4px; height:20px; background:var(--gold); border-radius:2px;}
+  .hint{color:var(--txt3); font-size:13px; margin-bottom:16px;}
+
+  /* 铁律卡片 */
+  .grid{display:grid; gap:14px;}
+  .g6{grid-template-columns:repeat(3,1fr);}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+  }
+  .card .no{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:28px; height:28px; border-radius:8px; background:var(--card2); color:var(--gold);
+    font-weight:800; font-size:14px; margin-bottom:10px; border:1px solid var(--line);
+  }
+  .card h3{font-size:16px; margin-bottom:6px;}
+  .card p{color:var(--txt2); font-size:13px;}
+
+  /* tabs */
+  .tabs{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0;}
+  .tab{
+    background:var(--card); border:1px solid var(--line); color:var(--txt2);
+    padding:9px 15px; border-radius:10px; cursor:pointer; font-size:14px; transition:.15s;
+  }
+  .tab:hover{color:var(--txt); border-color:var(--line2);}
+  .tab.active{background:linear-gradient(90deg,#2a2113,#1c2531); color:var(--gold2); border-color:#5a4520;}
+
+  .panel{display:none; animation:fade .2s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  .tool{
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:13px; color:var(--txt2); margin-bottom:7px;}
+  .field .desc{font-size:12px; color:var(--txt3); margin-top:4px;}
+  input[type=number], input[type=text], select{
+    width:100%; background:var(--bg2); border:1px solid var(--line); color:var(--txt);
+    border-radius:9px; padding:11px 13px; font-size:15px; outline:none; transition:.15s;
+  }
+  input:focus, select:focus{border-color:var(--blue);}
+  input::placeholder{color:var(--txt3);}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+
+  .seg{display:flex; gap:8px; flex-wrap:wrap;}
+  .seg button{
+    flex:1; min-width:80px; background:var(--bg2); border:1px solid var(--line); color:var(--txt2);
+    padding:10px; border-radius:9px; cursor:pointer; font-size:14px; transition:.15s;
+  }
+  .seg button.active{background:#1c2b1c; color:var(--green); border-color:#2f5a30;}
+
+  .btn{
+    display:inline-block; background:linear-gradient(90deg,var(--gold),#c88f1e); color:#1a1203;
+    font-weight:700; font-size:15px; padding:12px 26px; border:none; border-radius:10px; cursor:pointer;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn.ghost{background:var(--card2); color:var(--txt); border:1px solid var(--line2); font-weight:500;}
+
+  .result{margin-top:20px;}
+  table{width:100%; border-collapse:collapse; font-size:13px; margin-top:10px;}
+  th,td{padding:9px 11px; text-align:left; border-bottom:1px solid var(--line);}
+  th{color:var(--txt3); font-weight:600; font-size:12px; white-space:nowrap;}
+  td{color:var(--txt);}
+  tr:hover td{background:var(--card2);}
+  .up{color:var(--green); font-weight:600;}
+  .down{color:var(--orange); font-weight:600;}
+  .tag-chip{display:inline-block; padding:2px 9px; border-radius:6px; font-size:12px; font-weight:600;}
+  .chip-buy{background:#12291a; color:var(--green);}
+  .chip-sell{background:#2b1c12; color:var(--orange);}
+  .chip-hold{background:#1a2230; color:var(--blue);}
+  .chip-warn{background:#2b1214; color:var(--red);}
+
+  .callout{
+    margin-top:14px; border-radius:10px; padding:13px 15px; font-size:13px; border:1px solid;
+  }
+  .callout.buy{background:#0f2015; border-color:#2f5a30; color:#9fdcaa;}
+  .callout.sell{background:#241c0c; border-color:#5a4520; color:#e5c67a;}
+  .callout.info{background:#101a26; border-color:#2b3d55; color:#a6c3e8;}
+  .callout.warn{background:#201012; border-color:#5a2f2f; color:#e8a6a6;}
+
+  .kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:14px;}
+  .kv .box{background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .kv .k{font-size:12px; color:var(--txt3);}
+  .kv .v{font-size:18px; font-weight:800; margin-top:3px;}
+
+  /* 配比条 */
+  .bar-row{display:flex; height:34px; border-radius:9px; overflow:hidden; margin-top:12px; border:1px solid var(--line);}
+  .bar-row .segx{display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#0b0f14;}
+  .segx.a{background:var(--gold);}
+  .segx.b{background:#4d8df0;}
+  .segx.c{background:#3fb950;}
+
+  /* 实时锚点刷新器 */
+  .la-card{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:15px 16px; margin-top:12px;}
+  .la-head{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;}
+  .la-name{font-weight:700; font-size:15px;}
+  .la-code{color:var(--txt3); font-weight:400; font-size:13px; margin-left:2px;}
+  .la-cur{width:170px; background:var(--bg2); border:1px solid var(--line); color:var(--txt); border-radius:8px; padding:8px 11px; font-size:14px; outline:none; text-align:right;}
+  .la-cur:focus{border-color:var(--blue);}
+  .la-anchors{margin-top:11px; font-size:12px; color:var(--txt2); line-height:1.9;}
+  .la-anchors .a{display:inline-block; margin:1px 6px 1px 0; padding:2px 8px; border-radius:6px; background:var(--card); border:1px solid var(--line); color:var(--txt2);}
+  .la-anchors .stale{opacity:.5; text-decoration:line-through;}
+  .la-anchors .live{border-color:#2f5a30; color:var(--green); text-decoration:none;}
+  .la-triggers{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; font-size:13px;}
+  .la-triggers .t{background:var(--bg2); border:1px solid var(--line); border-radius:8px; padding:7px 12px; color:var(--txt2);}
+  .la-triggers .t b{font-size:14px;}
+
+  /* 投资账本 */
+  .ltabs{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0;}
+  .ltab{background:var(--card); border:1px solid var(--line); color:var(--txt2); padding:9px 15px; border-radius:10px; cursor:pointer; font-size:14px; transition:.15s;}
+  .ltab:hover{color:var(--txt); border-color:var(--line2);}
+  .ltab.active{background:linear-gradient(90deg,#2a2113,#1c2531); color:var(--gold2); border-color:#5a4520;}
+  .lpanel{display:none; animation:fade .2s ease;}
+  .lpanel.active{display:block;}
+  .ledger-list{display:flex; flex-direction:column; gap:10px;}
+  .ledger-item{background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .ledger-item .li-head{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  .ledger-item .li-title{font-weight:600; font-size:14px;}
+  .ledger-item .li-meta{font-size:12px; color:var(--txt3);}
+  .ledger-item .li-body{margin-top:8px; font-size:13px; color:var(--txt2);}
+  .del-btn{background:none; border:1px solid var(--line); color:var(--txt3); border-radius:6px; padding:3px 9px; cursor:pointer; font-size:12px;}
+  .del-btn:hover{color:var(--red); border-color:#5a2f2f;}
+  .bar-chart{margin-top:6px;}
+  .bar-row-item{display:flex; align-items:center; gap:10px; margin:6px 0;}
+  .bar-row-item .bar-label{width:110px; font-size:12px; color:var(--txt2); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bar-row-item .bar-track{flex:1; background:var(--bg2); border-radius:6px; height:18px; overflow:hidden;}
+  .bar-row-item .bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--blue)); border-radius:6px; transition:width .3s;}
+  .bar-row-item .bar-val{width:90px; font-size:12px; color:var(--txt3);}
+
+  .foot{margin-top:50px; color:var(--txt3); font-size:12px; border-top:1px solid var(--line); padding-top:16px;}
+
+  @media(max-width:820px){
+    .g6{grid-template-columns:1fr 1fr;}
+    .row,.row3{grid-template-columns:1fr;}
+  }
+  @media(max-width:520px){ .g6{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <h1>金渐成 · 美股投资决策模型</h1>
+      <span class="tag">JIN JIANCHENG INVESTMENT MODEL</span>
+    </div>
+    <p class="sub">把金渐成（玑哥）主号 441 篇文章 + 天机奇谈 317 篇文章的方法论，压缩成一套可交互的「买卖点触发 + 金字塔仓位 + 三账户配比」决策工具。输入当前价格，自动算出该买、该卖还是该等。</p>
+  </header>
+
+  <div class="banner">
+    <b>边界声明：</b>这套体系建立在超大资金体量 + 负成本底仓 + 充足现金流之上。普通人不要照搬具体价位，只吸收它的纪律内核。所有价位都是文章写作当日的记录，市场已变化，仅作方法论参考。本工具不构成投资建议。
+  </div>
+
+  <!-- 六条铁律 -->
+  <section>
+    <h2><span class="bar"></span>六条铁律（核心信条）</h2>
+    <p class="hint">所有计算器都从这六条纪律推导而来，先懂纪律再看价位。</p>
+    <div class="grid g6">
+      <div class="card"><span class="no">1</span><h3>不追高，逢低买入</h3><p>机会是跌出来的，风险是涨出来的。上涨、创新高、情绪狂热期不追；只在基本面未恶化前提下、大跌中分批买。</p></div>
+      <div class="card"><span class="no">2</span><h3>逢高减仓，做负成本</h3><p>创新高、到预设节点、情绪狂热时减仓一部分，逐步把成本降到 0 以下。达到预期就卖，别总想还能创新高。</p></div>
+      <div class="card"><span class="no">3</span><h3>永不满仓</h3><p>满仓的骨子里都是赌徒。常规 7-7.5 成仓，最少留 30% 现金/备用金，最高不超过 8.5 成。</p></div>
+      <div class="card"><span class="no">4</span><h3>只用闲钱</h3><p>2008 年教训。投资资金必须是不影响生活的闲钱，亏了顶多心疼，不伤筋动骨。</p></div>
+      <div class="card"><span class="no">5</span><h3>谨慎用杠杆</h3><p>2022 年纳指 -37.7% 被杠杆教训过。除非有非常大把握，否则不用杠杆。</p></div>
+      <div class="card"><span class="no">6</span><h3>做好防守配置</h3><p>防御型资产必须在进攻型之前先安排。美股进攻 + 美债/SCHD/高股息/伯克希尔防守，安全垫思维。</p></div>
+    </div>
+  </section>
+
+  <!-- 决策工具 -->
+  <section>
+    <h2><span class="bar"></span>交互决策工具</h2>
+    <p class="hint">选择模块，填入你看到的实时价格/点位，即可得到买卖计划。</p>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-t="buy_index">大盘/宽基买入</div>
+      <div class="tab" data-t="buy_stock">个股买入</div>
+      <div class="tab" data-t="sell">卖出/减仓</div>
+      <div class="tab" data-t="vix">VIX 恐慌判断</div>
+      <div class="tab" data-t="position">仓位管理</div>
+    </div>
+
+    <!-- 大盘买入 -->
+    <div class="panel active" id="buy_index">
+      <div class="tool">
+        <div class="row">
+          <div class="field">
+            <label>选择宽基指数</label>
+            <div class="seg" id="idxSeg">
+              <button class="active" data-v="spx">标普 500（SPY/VOO）</button>
+              <button data-v="ndx">纳指 100（QQQ）</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>当前点位 / 价格</label>
+            <input type="number" id="idxPrice" placeholder="例如 6000（标普）或 22000（纳指）">
+          </div>
+          <div class="field">
+            <label>单批基准资金（可选）</label>
+            <input type="number" id="idxUnit" placeholder="例如 10000，留空只看倍数">
+            <div class="desc">用于把金字塔倍数换算成每批实际投入金额。</div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn" onclick="calcIndex()">生成分批买入计划</button>
+          <button class="btn ghost" onclick="resetIndex()">清空</button>
+        </div>
+        <div class="result" id="idxResult"></div>
+      </div>
+    </div>
+
+    <!-- 个股买入 -->
+    <div class="panel" id="buy_stock">
+      <div class="tool">
+        <div class="row">
+          <div class="field">
+            <label>标的名称（可选）</label>
+            <input type="text" id="stName" placeholder="例如 英伟达 NVDA">
+          </div>
+          <div class="field">
+            <label>当前价 / 参考高点</label>
+            <input type="number" id="stPrice" placeholder="例如 180">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>标的质地（决定首次买入的跌幅）</label>
+            <select id="stQuality">
+              <option value="20">极优质龙头（跌 20% 就动手）</option>
+              <option value="30" selected>优质龙头（跌 30% 开始买）</option>
+              <option value="50">保守（跌 50% 才建仓）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>加仓档差（每再跌多少加一次）</label>
+            <select id="stStep">
+              <option value="4">4%（资金小步快跑）</option>
+              <option value="5" selected>5%（标准）</option>
+              <option value="8">8%（资金有限）</option>
+              <option value="10">10%（高价股 / 资金紧张）</option>
+              <option value="15">15%（大幅拉开档差）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>单批基准资金（可选）</label>
+            <input type="number" id="stUnit" placeholder="例如 5000，留空只看倍数">
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn" onclick="calcStock()">生成个股分批计划</button>
+          <button class="btn ghost" onclick="resetStock()">清空</button>
+        </div>
+        <div class="result" id="stResult"></div>
+      </div>
+    </div>
+
+    <!-- 卖出 -->
+    <div class="panel" id="sell">
+      <div class="tool">
+        <div class="row">
+          <div class="field">
+            <label>标的名称（可选）</label>
+            <input type="text" id="slName" placeholder="例如 英伟达 NVDA">
+          </div>
+          <div class="field">
+            <label>你的持仓成本价</label>
+            <input type="number" id="slCost" placeholder="例如 82">
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn" onclick="calcSell()">生成减仓计划</button>
+          <button class="btn ghost" onclick="resetSell()">清空</button>
+        </div>
+        <div class="result" id="slResult"></div>
+      </div>
+    </div>
+
+    <!-- VIX -->
+    <div class="panel" id="vix">
+      <div class="tool">
+        <div class="field" style="max-width:360px;">
+          <label>当前 VIX 恐慌指数</label>
+          <input type="number" id="vixVal" placeholder="例如 18.5">
+        </div>
+        <button class="btn" onclick="calcVix()">判断市场情绪</button>
+        <div class="result" id="vixResult"></div>
+      </div>
+    </div>
+
+    <!-- 仓位 -->
+    <div class="panel" id="position">
+      <div class="tool">
+        <div class="field" style="max-width:360px;">
+          <label>你当前股票仓位比例（%）</label>
+          <input type="number" id="posVal" placeholder="例如 75">
+        </div>
+        <button class="btn" onclick="calcPosition()">评估仓位</button>
+        <div class="result" id="posResult"></div>
+
+        <div style="margin-top:28px;">
+          <h3 style="font-size:16px; margin-bottom:6px;">三账户配置（杠铃策略）</h3>
+          <p class="hint" style="margin-bottom:8px;">目标配比：进取 40% 以下 · 稳健 15% · 防守 45%（两头大、中间小）。</p>
+          <div class="bar-row">
+            <div class="segx a" style="width:40%;">进取 ≤40%</div>
+            <div class="segx b" style="width:15%;">稳健 15%</div>
+            <div class="segx c" style="width:45%;">防守 45%</div>
+          </div>
+          <div class="kv">
+            <div class="box"><div class="k">进取型（进攻）</div><div class="v" style="color:var(--gold);">≤40%</div><div class="desc" style="font-size:12px;color:var(--txt3);">七巨头 + 台积电 + 博通 + AMD</div></div>
+            <div class="box"><div class="k">稳健型（底仓）</div><div class="v" style="color:var(--blue);">15%</div><div class="desc" style="font-size:12px;color:var(--txt3);">两个宽基 ETF + 消费 + 医药保健</div></div>
+            <div class="box"><div class="k">防守型（安全垫）</div><div class="v" style="color:var(--green);">45%</div><div class="desc" style="font-size:12px;color:var(--txt3);">美债 + BIL/SHY/TLT + 伯克希尔 + SCHD</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 全资产价格库 -->
+  <section>
+    <h2><span class="bar"></span>全资产关键价位速查库</h2>
+    <p class="hint">来自文章写作当日的记录，只作方法论参考，不是当前建议价。</p>
+
+    <div class="card">
+      <h3>宽基指数 · 买入触发</h3>
+      <table>
+        <tr><th>指数</th><th>首次买入跌幅</th><th>加仓档差</th><th>买入次数</th><th>金字塔倍数</th></tr>
+        <tr><td>标普 500（SPY/VOO）</td><td class="down">跌 6.5% 开始</td><td>每 2.5-3% 加一次</td><td>&gt;6 次</td><td>1-1-1.5-1.5-2-2-3</td></tr>
+        <tr><td>纳指 100（QQQ）</td><td class="down">跌 9% 开始</td><td>每 3.5% 加一次</td><td>&gt;7 次</td><td>1-1-1.5-1.5-2-2-3-3</td></tr>
+      </table>
+      <p class="hint" style="margin-top:10px;">纳指分级资金分配（2025-04 案例）：17500 起买，17500-16500 用 10% 资金、16500-15500 用 20%、15500-14500 用 30%、14500 以下（超卖）用 40%，可从美债套现补充。</p>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>实时锚点刷新器（输入当前价自动换算）</h3>
+      <p class="hint" style="margin-bottom:4px;">历史锚点来自文章当日记录，已标灰并注明日期（「未到」= 还没跌/涨到该价，仍有效；「已低于现价 / 已触发」= 该价位已作废）。填入当前价后，右侧自动按金渐成规则重算今日买卖触发价。</p>
+      <div id="liveTable"></div>
+      <p class="hint" style="margin-top:14px;">美债 / TLT / BIL / SHY：短债:长债 = 4:6，利率见顶降息时减持 BIL、增持 SHY + 少量 TLT（按收益率触发，不按价格）。SCHD / VYM：高派息防守，吃派息当现金流用于低位抄底。</p>
+    </div>
+  </section>
+
+  <!-- 我的投资账本 -->
+  <section>
+    <h2><span class="bar"></span>我的投资账本（可云端同步）</h2>
+    <p class="hint">保存方案快照、记录交易、自动统计盈亏与仓位。默认存在本浏览器；配置 Supabase 后即可多设备同步。</p>
+
+    <div class="card">
+      <div class="la-head">
+        <h3 style="font-size:16px;">数据源</h3>
+        <span id="dbStatus" class="tag-chip chip-hold">本地存储</span>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <div class="field">
+          <label>Supabase 项目 URL</label>
+          <input type="text" id="dbUrl" placeholder="https://xxxx.supabase.co">
+        </div>
+        <div class="field">
+          <label>anon public key</label>
+          <input type="text" id="dbKey" placeholder="eyJhbGciOiJ...">
+        </div>
+      </div>
+      <p class="hint" style="margin-top:4px;">云端配置三步：Supabase 新建项目 → 在 SQL Editor 执行建表脚本（点「复制建表 SQL」）→ 把 URL 和 anon key 粘到上面 → 点「启用云端同步」。</p>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" onclick="enableCloud()">启用云端同步</button>
+        <button class="btn ghost" onclick="switchLocal()">切回本地存储</button>
+        <button class="btn ghost" onclick="copySql()">复制建表 SQL</button>
+      </div>
+    </div>
+
+    <div class="ltabs">
+      <div class="ltab active" data-l="schemes">方案快照</div>
+      <div class="ltab" data-l="trades">交易记账</div>
+      <div class="ltab" data-l="stats">统计</div>
+    </div>
+
+    <div class="lpanel active" id="l-schemes">
+      <div class="tool">
+        <p class="hint" style="margin-bottom:10px;">在上方任一计算器生成方案后，结果区会出现「保存此方案」按钮，点了就存到这里。</p>
+        <div id="schemeList" class="ledger-list"></div>
+      </div>
+    </div>
+
+    <div class="lpanel" id="l-trades">
+      <div class="tool">
+        <div class="row">
+          <div class="field"><label>标的名称</label><input type="text" id="trName" placeholder="例如 英伟达"></div>
+          <div class="field"><label>方向</label>
+            <div class="seg" id="trSide"><button class="active" data-v="buy">买入</button><button data-v="sell">卖出</button></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field"><label>成交价</label><input type="number" id="trPrice" placeholder="例如 165"></div>
+          <div class="field"><label>股数 / 数量</label><input type="number" id="trShares" placeholder="例如 100"></div>
+        </div>
+        <button class="btn" onclick="addTrade()" style="margin-top:6px;">记录这笔交易</button>
+        <div id="tradeList" style="margin-top:16px;"></div>
+        <div id="portfolioBox"></div>
+      </div>
+    </div>
+
+    <div class="lpanel" id="l-stats">
+      <div class="tool">
+        <div id="statsBox"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    数据蒸馏自金渐成主号 441 篇（2022-11 ~ 2026-08）与天机奇谈副号 317 篇（2020-02 ~ 2026-04）。所有价位为文章写作当日记录，仅作方法论参考。<br>
+    <b style="color:#e8a6a6;">风险提示：</b>本工具不构成投资建议。投资有风险，决策需谨慎。普通人请优先「只用闲钱、永不满仓、不用杠杆、先防守后进攻」。
+  </div>
+</div>
+
+<script>
+// ===== 通用 =====
+function $(id){ return document.getElementById(id); }
+function fmt(n, d=2){
+  if(n===null || n===undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function fmtMoney(n){
+  if(n===null || n===undefined || isNaN(n)) return '—';
+  return '¥' + Number(n).toLocaleString('zh-CN',{maximumFractionDigits:0});
+}
+function pct(n, d=1){
+  if(n===null || n===undefined || isNaN(n)) return '—';
+  return Number(n).toFixed(d) + '%';
+}
+
+// tab 切换
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+tabs.forEach(t=>{
+  t.addEventListener('click', ()=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    panels.forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const target = document.getElementById(t.dataset.t);
+    if(target) target.classList.add('active');
+  });
+});
+
+// 指数分段按钮
+const idxSeg = document.getElementById('idxSeg');
+let idxMode = 'spx';
+idxSeg.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    idxSeg.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    idxMode = b.dataset.v;
+  });
+});
+
+// ===== 大盘/宽基买入 =====
+function calcIndex(){
+  const P = parseFloat($('idxPrice').value);
+  const unit = parseFloat($('idxUnit').value);
+  const el = $('idxResult');
+  if(!P || P<=0){ el.innerHTML = '<div class="callout warn">请输入有效的当前点位。</div>'; return; }
+
+  let firstDrop, step, steps, mult;
+  if(idxMode==='spx'){
+    firstDrop = 0.065; step = 0.0275; mult = [1,1,1.5,1.5,2,2,3]; steps = 7;
+  } else {
+    firstDrop = 0.09; step = 0.035; mult = [1,1,1.5,1.5,2,2,3,3]; steps = 8;
+  }
+  const name = idxMode==='spx' ? '标普 500' : '纳指 100';
+  const sumMult = mult.reduce((a,b)=>a+b,0);
+
+  let rows = '';
+  let cumAmt = 0;
+  const rowsData = [];
+  for(let i=0;i<steps;i++){
+    const dropFromTop = firstDrop + step*i;
+    const price = P * (1 - dropFromTop);
+    const m = mult[i];
+    const pctOfFund = m/sumMult*100;
+    const amt = unit ? unit*m : null;
+    cumAmt += amt || 0;
+    rowsData.push({i:i+1, price, dropFromTop, m, pctOfFund, amt});
+    rows += `<tr>
+      <td>第 ${i+1} 批</td>
+      <td class="down">${fmt(price, (P<100?1:0))}</td>
+      <td>${pct(dropFromTop*100)}</td>
+      <td>${i===0?'—':pct(step*100)}</td>
+      <td>${m} 倍</td>
+      <td>${pct(pctOfFund,0)}</td>
+      ${unit ? `<td>${fmtMoney(amt)}</td>` : ''}
+    </tr>`;
+  }
+
+  const body = `
+    <div class="callout info">
+      <b>${name}</b>：当前 <b>${fmt(P)}</b>。跌 <b>${pct(firstDrop*100)}</b>（约 <b>${fmt(P*(1-firstDrop), (P<100?1:0))}</b>）开始第一笔，之后每再跌 <b>${pct(step*100)}</b> 加一次，共 ${steps} 次。金字塔倍数 <b>${mult.join('-')}</b>，最后的重仓「3」动用额外资金（大跌大买）。
+    </div>
+    <table>
+      <tr><th>批次</th><th>触发点位</th><th>累计跌幅</th><th>相对上批</th><th>倍数</th><th>占该笔总资金</th>${unit?'<th>投入金额</th>':''}</tr>
+      ${rows}
+    </table>
+    ${unit ? `<div class="callout buy">按单批基准 ${fmtMoney(unit)} 计算，全部触发共需约 <b>${fmtMoney(cumAmt)}</b>。请确认这是你的「闲钱弹药」，且不超过总现金储备。</div>` : ''}
+    <div class="callout buy">VIX 联动：VIX 到 30 捞宽基、40 开始买个股+两个宽基、50 重点加仓打掉 50%+ 资金、50-90 是很好买入节点。</div>
+  `;
+  currentScheme = {type:'指数', title:`${name} 分批买入计划`, html: body};
+  el.innerHTML = body + `<div style="margin-top:16px; text-align:right;"><button class="btn ghost" onclick="saveCurrentScheme()">保存此方案到账本</button></div>`;
+}
+function resetIndex(){
+  $('idxPrice').value=''; $('idxUnit').value=''; $('idxResult').innerHTML='';
+}
+
+// ===== 个股买入 =====
+function calcStock(){
+  const name = $('stName').value.trim() || '该标的';
+  const P = parseFloat($('stPrice').value);
+  const q = parseFloat($('stQuality').value)/100;
+  const step = parseFloat($('stStep').value)/100;
+  const unit = parseFloat($('stUnit').value);
+  const el = $('stResult');
+  if(!P || P<=0){ el.innerHTML = '<div class="callout warn">请输入有效的当前价。</div>'; return; }
+
+  const mult = [1,1,1.5,1.5,2,2];
+  const steps = mult.length;
+  const sumMult = mult.reduce((a,b)=>a+b,0);
+
+  let rows = '', cumAmt = 0;
+  for(let i=0;i<steps;i++){
+    const drop = q + step*i;
+    const price = P * (1 - drop);
+    const m = mult[i];
+    const pctFund = m/sumMult*100;
+    const amt = unit ? unit*m : null;
+    cumAmt += amt||0;
+    rows += `<tr>
+      <td>第 ${i+1} 批</td>
+      <td class="down">${fmt(price)}</td>
+      <td>${pct(drop*100)}</td>
+      <td>${i===0?'—':pct(step*100)}</td>
+      <td>${m} 倍</td>
+      <td>${pct(pctFund,0)}</td>
+      ${unit?`<td>${fmtMoney(amt)}</td>`:''}
+    </tr>`;
+  }
+
+  const body = `
+    <div class="callout info">
+      <b>${name}</b>：当前 <b>${fmt(P)}</b>。跌 <b>${pct(q*100)}</b>（约 <b>${fmt(P*(1-q))}</b>）开始第一笔，之后每再跌 <b>${pct(step*100)}</b> 加一次。前提：<b>基本面没有恶化</b>。
+    </div>
+    <table>
+      <tr><th>批次</th><th>触发价</th><th>累计跌幅</th><th>相对上批</th><th>倍数</th><th>占该笔总资金</th>${unit?'<th>投入金额</th>':''}</tr>
+      ${rows}
+    </table>
+    ${unit?`<div class="callout buy">按单批基准 ${fmtMoney(unit)} 计算，全部触发共需约 <b>${fmtMoney(cumAmt)}</b>。</div>`:''}
+    <div class="callout warn">选股前提：要么第一、要么唯一、最好二者兼得（市占率第一 + 不可复制护城河）。不碰不懂的行业、估值离谱的公司、中概股。</div>
+  `;
+  currentScheme = {type:'个股', title:`${name} 分批买入计划`, html: body};
+  el.innerHTML = body + `<div style="margin-top:16px; text-align:right;"><button class="btn ghost" onclick="saveCurrentScheme()">保存此方案到账本</button></div>`;
+}
+function resetStock(){
+  $('stName').value=''; $('stPrice').value=''; $('stUnit').value='';
+  $('stQuality').value='30'; $('stStep').value='5'; $('stResult').innerHTML='';
+}
+
+// ===== 卖出/减仓 =====
+function calcSell(){
+  const name = $('slName').value.trim() || '该标的';
+  const C = parseFloat($('slCost').value);
+  const el = $('slResult');
+  if(!C || C<=0){ el.innerHTML = '<div class="callout warn">请输入有效的成本价。</div>'; return; }
+
+  // 倒金字塔
+  const inv = [[0.30,10],[0.40,15],[0.50,20],[0.60,25],[0.80,30]];
+  let invRows = '';
+  inv.forEach(([r,p])=>{
+    invRows += `<tr><td class="up">${fmt(C*(1+r))}</td><td>+${pct(r*100,0)}</td><td>减 ${p}%</td></tr>`;
+  });
+
+  // 2-3-3-2
+  const p30 = C*1.3, p50 = C*1.5, p80 = C*1.8;
+
+  const body = `
+    <div class="callout sell"><b>${name}</b>：成本 <b>${fmt(C)}</b>。目标是把成本先掏出来，账户里只剩盈利部分，涨跌就不那么揪心了。</div>
+
+    <h4 style="margin:16px 0 4px; font-size:14px;">倒金字塔卖出（涨多少减多少）</h4>
+    <table>
+      <tr><th>目标价</th><th>累计涨幅</th><th>减仓比例</th></tr>
+      ${invRows}
+    </table>
+
+    <h4 style="margin:18px 0 4px; font-size:14px;">「2-3-3-2」法</h4>
+    <table>
+      <tr><th>阶段</th><th>区间</th><th>操作</th></tr>
+      <tr><td>第一阶段</td><td class="up">${fmt(p30)} ~ ${fmt(p50)}（+30%~+50%）</td><td>卖 20%（分 3-4 次，每次 5-10%）</td></tr>
+      <tr><td>第二阶段</td><td class="up">${fmt(p50)} ~ ${fmt(p80)}（+50%~+80%）</td><td>再卖 30%</td></tr>
+      <tr><td>剩余 50%</td><td>已接近/低于零成本</td><td>正常持有不卖，等创新高后再把浮盈落袋</td></tr>
+    </table>
+
+    <div class="callout sell">做 T 纪律：7 成底仓不做 T、3 成做 T；只在震荡行情做、不在单边上涨做；正 T 为主（先买后卖），不做反 T。做 T 首要目的是腾资金和仓位，其次才是降成本。</div>
+  `;
+  currentScheme = {type:'减仓', title:`${name} 减仓计划`, html: body};
+  el.innerHTML = body + `<div style="margin-top:16px; text-align:right;"><button class="btn ghost" onclick="saveCurrentScheme()">保存此方案到账本</button></div>`;
+}
+function resetSell(){
+  $('slName').value=''; $('slCost').value=''; $('slResult').innerHTML='';
+}
+
+// ===== VIX =====
+function calcVix(){
+  const v = parseFloat($('vixVal').value);
+  const el = $('vixResult');
+  if(isNaN(v) || v<0){ el.innerHTML = '<div class="callout warn">请输入有效的 VIX 数值。</div>'; return; }
+
+  let msg, cls;
+  if(v < 20){ msg = `VIX ${v}：市场平静偏乐观。风险是涨出来的——此时不追高，是观察与等待的阶段。`; cls='info'; }
+  else if(v < 30){ msg = `VIX ${v}：波动上升，进入关注区。暂不动手，把现金弹药备好，设好预设买入单。`; cls='info'; }
+  else if(v < 40){ msg = `VIX ${v}：恐慌升温，开始捞宽基指数（SPY/QQQ）。这是第一批买入节点。`; cls='buy'; }
+  else if(v < 50){ msg = `VIX ${v}：恐慌加剧，开始买个股 + 两个宽基 ETF。`; cls='buy'; }
+  else if(v < 90){ msg = `VIX ${v}：重点加仓区，资金至少打掉 50%+。50-90 是很好的买入节点。`; cls='buy'; }
+  else { msg = `VIX ${v}：极端恐慌（>90）。历史性机会与历史性风险并存，务必只用闲钱、留足后手、绝不一次性打光。`; cls='warn'; }
+
+  el.innerHTML = `<div class="callout ${cls}">${msg}</div>
+  <table style="margin-top:14px;">
+    <tr><th>VIX 区间</th><th>含义</th><th>操作</th></tr>
+    <tr><td>&lt;20</td><td>平静/乐观</td><td>不追高，等待</td></tr>
+    <tr><td>20-30</td><td>波动上升</td><td>关注，备好弹药</td></tr>
+    <tr><td>30-40</td><td>恐慌升温</td><td class="up">捞宽基指数</td></tr>
+    <tr><td>40-50</td><td>恐慌加剧</td><td class="up">买个股 + 两个宽基</td></tr>
+    <tr><td>50-90</td><td>重点加仓区</td><td class="up">资金至少打掉 50%+</td></tr>
+    <tr><td>&gt;90</td><td>极端恐慌</td><td class="down">只闲钱、留后手、分批</td></tr>
+  </table>`;
+}
+
+// ===== 仓位 =====
+function calcPosition(){
+  const p = parseFloat($('posVal').value);
+  const el = $('posResult');
+  if(isNaN(p) || p<0 || p>100){ el.innerHTML = '<div class="callout warn">请输入 0-100 之间的仓位百分比。</div>'; return; }
+
+  const cash = 100 - p;
+  let msg, cls;
+  if(p < 70){ msg=`当前持仓 ${p}%，现金 ${pct(cash,0)}。仓位偏轻，手上有充足弹药，处于「有选择、不被动」的舒服状态。等待目标价击球即可。`; cls='info'; }
+  else if(p <= 75){ msg=`当前持仓 ${p}%，现金 ${pct(cash,0)}。这正是金渐成偏好的 7-7.5 成仓 + 30% 现金节奏，合理区间。`; cls='buy'; }
+  else if(p <= 85){ msg=`当前持仓 ${p}%，现金 ${pct(cash,0)}。仓位偏高，仍在 8.5 成上限内，但建议逢高减仓回笼现金，留足下跌时的子弹。`; cls='warn'; }
+  else { msg=`当前持仓 ${p}%，已超 8.5 成警戒线。满仓的骨子里都是赌徒——太早满仓，机会来了只能干瞪眼。请逢高减仓，把现金比例拉回 30% 以上。`; cls='warn'; }
+
+  el.innerHTML = `
+    <div class="callout ${cls}">${msg}</div>
+    <div class="kv">
+      <div class="box"><div class="k">股票仓位</div><div class="v">${pct(p,0)}</div></div>
+      <div class="box"><div class="k">现金 / 备用金</div><div class="v" style="color:var(--green);">${pct(cash,0)}</div></div>
+      <div class="box"><div class="k">金渐成偏好</div><div class="v" style="color:var(--gold);">7 : 3</div></div>
+    </div>
+    <div class="callout info" style="margin-top:14px;">仓位管理的核心 = 现金流管理：牺牲少量潜在收益，换取始终处于「有选择、不陷入被动」的境地。</div>
+  `;
+}
+
+// ===== 实时锚点刷新器 =====
+function fmtP(n){ return Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2}); }
+
+const liveAssets = [
+  {name:'英伟达', code:'NVDA', cur:211.8, buyMode:'pct30',
+    anchors:[{t:'buy',p:165,d:'26/03'},{t:'buy',p:155,d:'26/03'},{t:'buy',p:145,d:'26/03'},{t:'buy',p:130,d:'26/03'},{t:'sell',p:200,d:'25'}]},
+  {name:'微软', code:'MSFT', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:395,d:'26/02'},{t:'buy',p:380,d:'26/02'},{t:'buy',p:355,d:'26/02'}]},
+  {name:'苹果', code:'AAPL', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:178,d:'25/04'},{t:'buy',p:168,d:'25/04'}]},
+  {name:'谷歌', code:'GOOGL', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:140,d:'25'},{t:'sell',p:380,d:'26/02'}]},
+  {name:'亚马逊', code:'AMZN', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:192,d:'26/02'},{t:'buy',p:150,d:'25/04'}]},
+  {name:'Meta', code:'META', cur:642.6, buyMode:'pct30',
+    anchors:[{t:'buy',p:583,d:'26/03'},{t:'buy',p:556,d:'26/03'},{t:'sell',p:810,d:'25'}]},
+  {name:'特斯拉', code:'TSLA', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:375,d:'25/01'},{t:'sell',p:261,d:'24'}]},
+  {name:'台积电', code:'TSM', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:300,d:'26/03'},{t:'sell',p:400,d:'26/02'}]},
+  {name:'伯克希尔', code:'BRK.B', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:473,d:'26/01'},{t:'buy',p:450,d:'26/01'},{t:'buy',p:437,d:'26/01'},{t:'buy',p:413,d:'26/01'}]},
+  {name:'可口可乐', code:'KO', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:60.5,d:''},{t:'buy',p:55,d:''}]},
+  {name:'联合健康', code:'UNH', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:300,d:''},{t:'sell',p:350,d:''}]},
+  {name:'礼来', code:'LLY', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:620,d:'25/08'},{t:'buy',p:640,d:'25/08'},{t:'buy',p:696,d:'25/08'},{t:'sell',p:990,d:''}]},
+  {name:'Costco', code:'COST', cur:'', buyMode:'pct30',
+    anchors:[{t:'buy',p:855,d:''},{t:'sell',p:1100,d:''}]},
+  {name:'比特币', code:'BTC', cur:80472, buyMode:'fixed', fixedBuy:56000,
+    anchors:[{t:'buy',p:56000,d:'26/02'}]},
+  {name:'黄金', code:'XAU', cur:3995, buyMode:'none',
+    anchors:[{t:'sell',p:5000,d:'26/03'}]}
+];
+
+function renderLive(){
+  const host = $('liveTable');
+  let html = '';
+  liveAssets.forEach((a,i)=>{
+    html += `<div class="la-card" id="la-${i}">
+      <div class="la-head">
+        <span class="la-name">${a.name} <span class="la-code">${a.code}</span></span>
+        <input class="la-cur" data-i="${i}" type="number" value="${a.cur}" placeholder="填当前价">
+      </div>
+      <div class="la-anchors" id="laa-${i}"></div>
+      <div class="la-triggers" id="lat-${i}"></div>
+    </div>`;
+  });
+  host.innerHTML = html;
+  host.querySelectorAll('.la-cur').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const v = parseFloat(e.target.value);
+      liveAssets[+e.target.dataset.i].cur = isNaN(v) ? '' : v;
+      updateLive(+e.target.dataset.i);
+    });
+  });
+  liveAssets.forEach((a,i)=>updateLive(i));
+}
+
+function updateLive(i){
+  const a = liveAssets[i];
+  const cur = a.cur;
+  const hasCur = cur !== '' && cur !== null && !isNaN(cur) && cur > 0;
+
+  let anchors = '';
+  a.anchors.forEach(an=>{
+    let cls='a', note='';
+    if(hasCur){
+      if(an.t==='buy'){ const stale = an.p < cur; cls = stale ? 'a stale' : 'a live'; note = stale ? '已低于现价' : '未到'; }
+      else { const stale = an.p <= cur; cls = stale ? 'a stale' : 'a live'; note = stale ? '已触发' : '未到'; }
+    }
+    anchors += `<span class="${cls}">${an.t==='buy'?'买':'减'} ${fmtP(an.p)}${an.d?' ('+an.d+')':''}${note?' · '+note:''}</span>`;
+  });
+  $('laa-'+i).innerHTML = anchors;
+
+  let triggers = '';
+  if(hasCur){
+    if(a.buyMode==='pct30'){
+      triggers += `<span class="t">今日买入 <b class="down">${fmtP(cur*0.7)}</b>（跌 30% 起）</span>`;
+      triggers += `<span class="t">今日减仓 <b class="up">${fmtP(cur*1.3)}</b>（+30% 起）</span>`;
+    } else if(a.buyMode==='fixed'){
+      triggers += `<span class="t">今日买入 <b class="down">${fmtP(a.fixedBuy)}</b>（金渐成锚点）</span>`;
+      triggers += `<span class="t">减仓：历史上 6.8-7 万清仓过</span>`;
+    } else if(a.buyMode==='none'){
+      triggers += `<span class="t">买入：高位不追</span>`;
+      triggers += `<span class="t">减仓：5000 以上看不懂</span>`;
+    }
+  } else {
+    triggers = '<span class="t" style="opacity:.6;">填入当前价后实时刷新</span>';
+  }
+  $('lat-'+i).innerHTML = triggers;
+}
+
+renderLive();
+
+// ===== 投资账本 =====
+function money(n){ return Number(n).toLocaleString('zh-CN',{maximumFractionDigits:0}); }
+
+const SUPABASE_SQL = `-- 方案快照表
+create table if not exists schemes (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz default now(),
+  type text,
+  title text,
+  payload jsonb
+);
+-- 交易记录表
+create table if not exists trades (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz default now(),
+  name text,
+  side text,
+  price numeric,
+  shares numeric
+);
+-- 开启行级安全 + 匿名读写（个人自用；任何人拿到 anon key 都能读写，请勿存放敏感信息）
+alter table schemes enable row level security;
+alter table trades enable row level security;
+create policy "anon_all" on schemes for all using (true) with check (true);
+create policy "anon_all" on trades for all using (true) with check (true);`;
+
+const DB = {
+  get mode(){ return localStorage.getItem('jj_mode') || 'local'; },
+  get url(){ return localStorage.getItem('jj_supabase_url') || ''; },
+  get key(){ return localStorage.getItem('jj_supabase_key') || ''; },
+  async load(table){
+    if(this.mode==='supabase' && this.url && this.key){
+      try{
+        const r = await fetch(`${this.url}/rest/v1/${table}?select=*&order=created_at.desc`, {
+          headers:{'apikey':this.key,'Authorization':'Bearer '+this.key}
+        });
+        if(!r.ok) throw new Error('load '+table+' failed '+r.status);
+        return await r.json();
+      }catch(e){ console.warn(e); return []; }
+    }
+    return JSON.parse(localStorage.getItem('jj_'+table) || '[]');
+  },
+  async add(table, row){
+    if(this.mode==='supabase' && this.url && this.key){
+      const r = await fetch(`${this.url}/rest/v1/${table}`, {
+        method:'POST',
+        headers:{'apikey':this.key,'Authorization':'Bearer '+this.key,'Content-Type':'application/json','Prefer':'return=representation'},
+        body: JSON.stringify(row)
+      });
+      if(!r.ok){ alert('云端写入失败：请检查 URL / key 是否正确、建表 SQL 是否已执行'); return null; }
+      return await r.json();
+    }
+    const rows = JSON.parse(localStorage.getItem('jj_'+table) || '[]');
+    row.id = 'l'+Date.now()+Math.random().toString(36).slice(2,8);
+    row.created_at = new Date().toISOString();
+    rows.unshift(row);
+    localStorage.setItem('jj_'+table, JSON.stringify(rows));
+    return [row];
+  },
+  async remove(table, id){
+    if(this.mode==='supabase' && this.url && this.key){
+      await fetch(`${this.url}/rest/v1/${table}?id=eq.${id}`, {
+        method:'DELETE',
+        headers:{'apikey':this.key,'Authorization':'Bearer '+this.key}
+      });
+      return;
+    }
+    const rows = JSON.parse(localStorage.getItem('jj_'+table) || '[]');
+    localStorage.setItem('jj_'+table, JSON.stringify(rows.filter(r=>r.id!==id)));
+  }
+};
+
+function refreshDbStatus(){
+  const s = $('dbStatus');
+  if(DB.mode==='supabase' && DB.url && DB.key){
+    s.textContent = '云端同步 · Supabase'; s.className = 'tag-chip chip-buy';
+  } else {
+    s.textContent = '本地存储'; s.className = 'tag-chip chip-hold';
+  }
+  $('dbUrl').value = DB.url;
+  $('dbKey').value = DB.key;
+}
+function enableCloud(){
+  const url = $('dbUrl').value.trim().replace(/\/+$/,'');
+  const key = $('dbKey').value.trim();
+  if(!url || !key){ alert('请填写 Supabase URL 和 anon key'); return; }
+  localStorage.setItem('jj_supabase_url', url);
+  localStorage.setItem('jj_supabase_key', key);
+  localStorage.setItem('jj_mode', 'supabase');
+  refreshDbStatus();
+  loadLedger();
+  alert('已切换到云端同步。新增数据会写入 Supabase，多设备打开同一页面即可看到。\n\n注意：切换前在本地已有的数据不会自动上传，切回「本地存储」仍能看到。');
+}
+function switchLocal(){
+  localStorage.setItem('jj_mode', 'local');
+  refreshDbStatus();
+  loadLedger();
+}
+function copySql(){
+  navigator.clipboard.writeText(SUPABASE_SQL).then(()=>alert('建表 SQL 已复制，去 Supabase 项目的 SQL Editor 粘贴执行即可。')).catch(()=>prompt('手动复制以下 SQL：', SUPABASE_SQL));
+}
+
+// 账本 tab 切换
+document.querySelectorAll('.ltab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.ltab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.lpanel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    $('l-'+t.dataset.l).classList.add('active');
+  });
+});
+
+// 交易方向
+let trSide = 'buy';
+document.querySelectorAll('#trSide button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('#trSide button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    trSide = b.dataset.v;
+  });
+});
+
+// ===== 方案快照 =====
+let currentScheme = null;
+function saveCurrentScheme(){
+  if(!currentScheme){ alert('请先在上方计算器生成一个方案'); return; }
+  saveScheme(currentScheme.type, currentScheme.title, currentScheme.html);
+}
+async function saveScheme(type, title, html){
+  await DB.add('schemes', {type, title, payload:{html}});
+  renderSchemes();
+}
+async function renderSchemes(){
+  const rows = await DB.load('schemes');
+  const el = $('schemeList');
+  if(!rows.length){ el.innerHTML = '<p class="hint">还没有保存的方案。去上方计算器生成后点「保存此方案」。</p>'; return; }
+  el.innerHTML = rows.map(r=>`
+    <div class="ledger-item">
+      <div class="li-head">
+        <span class="li-title">${r.title||'未命名方案'}</span>
+        <span class="li-meta">${(r.created_at||'').slice(0,16).replace('T',' ')}　<button class="del-btn" onclick="delScheme('${r.id}')">删除</button></span>
+      </div>
+      <div class="li-body">${(r.payload&&r.payload.html)||''}</div>
+    </div>`).join('');
+}
+async function delScheme(id){
+  await DB.remove('schemes', id);
+  renderSchemes();
+}
+
+// ===== 交易记账 =====
+let curPrices = {};
+function computePortfolio(trades){
+  // 按时间正序重放，保证先买后卖的顺序正确
+  const sorted = [...trades].sort((a,b)=> new Date(a.created_at||0) - new Date(b.created_at||0));
+  const map = {};
+  sorted.forEach(t=>{
+    if(!map[t.name]) map[t.name] = {name:t.name, shares:0, cost:0, buyAmount:0, sellAmount:0, avgCost:0};
+    const m = map[t.name];
+    if(t.side==='buy'){
+      m.shares += t.shares;
+      m.cost += t.price*t.shares;
+      m.buyAmount += t.price*t.shares;
+      m.avgCost = m.shares>0 ? m.cost/m.shares : 0;
+    } else {
+      m.shares -= t.shares;
+      m.sellAmount += t.price*t.shares;
+      if(m.shares<=0){ m.shares=0; m.cost=0; m.avgCost=0; }
+      else { m.cost = m.avgCost*m.shares; }
+    }
+  });
+  return Object.values(map).filter(m=>m.shares>0);
+}
+function pnlCell(p, cur){
+  const diff = (cur - p.avgCost)*p.shares;
+  const cls = diff>=0?'up':'down';
+  return `<span class="${cls}">${diff>=0?'+':''}${money(diff)}</span>`;
+}
+async function addTrade(){
+  const name = $('trName').value.trim();
+  const price = parseFloat($('trPrice').value);
+  const shares = parseFloat($('trShares').value);
+  if(!name || isNaN(price) || isNaN(shares) || price<=0 || shares<=0){ alert('请填写标的名称、有效的成交价和股数'); return; }
+  await DB.add('trades', {name, side:trSide, price, shares});
+  $('trName').value=''; $('trPrice').value=''; $('trShares').value='';
+  renderTrades(); renderStats();
+}
+async function renderTrades(){
+  const rows = await DB.load('trades');
+  const el = $('tradeList');
+  if(!rows.length){ el.innerHTML = '<p class="hint">还没有交易记录。</p>'; }
+  else {
+    el.innerHTML = `<table><tr><th>时间</th><th>标的</th><th>方向</th><th>价格</th><th>股数</th><th>金额</th><th></th></tr>` +
+    rows.map(r=>`<tr>
+      <td style="color:var(--txt3);">${(r.created_at||'').slice(0,16).replace('T',' ')}</td>
+      <td>${r.name}</td>
+      <td>${r.side==='buy'?'<span class="tag-chip chip-buy">买入</span>':'<span class="tag-chip chip-sell">卖出</span>'}</td>
+      <td>${fmtP(r.price)}</td>
+      <td>${fmtP(r.shares)}</td>
+      <td>${money(r.price*r.shares)}</td>
+      <td><button class="del-btn" onclick="delTrade('${r.id}')">删除</button></td>
+    </tr>`).join('') + '</table>';
+  }
+  renderPortfolio(rows);
+}
+async function delTrade(id){
+  await DB.remove('trades', id);
+  renderTrades(); renderStats();
+}
+function renderPortfolio(trades){
+  const pf = computePortfolio(trades);
+  const host = $('portfolioBox');
+  if(!host) return;
+  if(!pf.length){ host.innerHTML=''; return; }
+  host.innerHTML = `<h4 style="margin:18px 0 6px; font-size:14px;">当前持仓（填当前价算盈亏）</h4>
+  <table><tr><th>标的</th><th>持股</th><th>平均成本</th><th>当前价</th><th>市值</th><th>浮盈</th></tr>` +
+  pf.map((p,i)=>{
+    const cur = curPrices[p.name]||'';
+    const mv = cur ? cur*p.shares : 0;
+    return `<tr>
+      <td>${p.name}</td>
+      <td>${fmtP(p.shares)}</td>
+      <td>${fmtP(p.avgCost)}</td>
+      <td><input type="number" data-pi="${i}" data-name="${p.name}" value="${cur}" placeholder="填当前价" style="width:96px;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:5px 8px;"></td>
+      <td data-mv="${i}">${cur?money(mv):'—'}</td>
+      <td data-pl="${i}">${cur?pnlCell(p,cur):'—'}</td>
+    </tr>`;
+  }).join('') + '</table>';
+  host.querySelectorAll('input[data-pi]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const name = e.target.dataset.name;
+      const v = parseFloat(e.target.value)||'';
+      curPrices[name] = v;
+      const i = +e.target.dataset.pi;
+      const p = pf[i];
+      const mv = v ? v*p.shares : 0;
+      host.querySelector(`td[data-mv="${i}"]`).innerHTML = v ? money(mv) : '—';
+      host.querySelector(`td[data-pl="${i}"]`).innerHTML = v ? pnlCell(p, v) : '—';
+      renderStats();
+    });
+  });
+}
+
+// ===== 统计 =====
+async function renderStats(){
+  const trades = await DB.load('trades');
+  const pf = computePortfolio(trades);
+  let buyTotal=0, sellTotal=0;
+  trades.forEach(t=>{ if(t.side==='buy') buyTotal += t.price*t.shares; else sellTotal += t.price*t.shares; });
+  const cost = pf.reduce((a,b)=>a+b.cost,0);
+  let mv=0, pl=0;
+  pf.forEach(p=>{ const c = curPrices[p.name]; if(c){ mv += c*p.shares; pl += (c-p.avgCost)*p.shares; } });
+  const withCur = pf.filter(p=>curPrices[p.name] && curPrices[p.name]*p.shares>0);
+  const totalMv = withCur.reduce((a,b)=>a+curPrices[b.name]*b.shares,0);
+
+  const el = $('statsBox');
+  el.innerHTML = `
+    <div class="kv">
+      <div class="box"><div class="k">累计买入</div><div class="v">${money(buyTotal)}</div></div>
+      <div class="box"><div class="k">累计卖出</div><div class="v">${money(sellTotal)}</div></div>
+      <div class="box"><div class="k">持仓成本</div><div class="v">${money(cost)}</div></div>
+      <div class="box"><div class="k">持仓市值</div><div class="v">${mv?money(mv):'—'}</div></div>
+      <div class="box"><div class="k">浮动盈亏</div><div class="v" style="color:${pl>=0?'var(--green)':'var(--red)'};">${mv?(pl>=0?'+':'')+money(pl):'—'}</div></div>
+      <div class="box"><div class="k">持仓标的</div><div class="v">${pf.length}</div></div>
+    </div>
+    <p class="hint" style="margin-top:10px;">浮动盈亏与市值需在「交易记账」里为每个持仓填入当前价。金额币种随标的（美股为美元）。总仓位请结合上方「仓位管理」工具。</p>
+    ${withCur.length?`<h4 style="margin:18px 0 4px; font-size:14px;">持仓市值分布</h4><div class="bar-chart">`+withCur.map(p=>{
+      const pct = totalMv>0 ? (curPrices[p.name]*p.shares/totalMv*100) : 0;
+      return `<div class="bar-row-item"><span class="bar-label">${p.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct.toFixed(1)}%;"></div></div><span class="bar-val">${pct.toFixed(1)}%</span></div>`;
+    }).join('')+'</div>':''}
+  `;
+}
+
+// ===== 初始化 =====
+async function loadLedger(){
+  await renderSchemes();
+  await renderTrades();
+  await renderStats();
+}
+refreshDbStatus();
+loadLedger();
+</script>
+</body>
+</html>
